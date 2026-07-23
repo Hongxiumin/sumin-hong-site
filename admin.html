@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관리자 페이지 · Sumin Hong 홈페이지 편집</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#170B2E; --violet:#8B5CF6; --violet-soft:#C4B5FD; --cyan:#22D3EE; --line:#DDD2EF; --paper:#F3EEFB; --card:#FAF7FE; --slate:#5B4B78;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans KR',sans-serif;}
+  header{background:var(--ink);color:#fff;padding:20px 28px;position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  header h1{font-size:16px;margin:0;font-weight:600;}
+  header p{margin:2px 0 0;font-size:12.5px;color:#C4B5FD;font-family:'IBM Plex Mono',monospace;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;}
+  button{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; border:none; border-radius:6px;
+    padding:9px 16px; cursor:pointer; transition:opacity .15s;
+  }
+  button:hover{opacity:.85;}
+  .btn-primary{background:var(--violet); color:#fff;}
+  .btn-secondary{background:#fff; color:var(--ink); border:1px solid var(--line) !important;}
+  .btn-danger{background:#FCE7F8; color:#A21CAF;}
+  main{max-width:900px;margin:0 auto;padding:28px 20px 100px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px 24px;margin-bottom:22px;}
+  .panel h2{font-size:15px;margin:0 0 4px;}
+  .panel .desc{font-size:12.5px;color:var(--slate);margin-bottom:16px;}
+  label{display:block;font-size:11.5px;font-family:'IBM Plex Mono',monospace;color:var(--slate);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;margin-top:14px;}
+  input[type=text], textarea{
+    width:100%; font-family:'IBM Plex Sans KR',sans-serif; font-size:14px; padding:9px 11px;
+    border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); resize:vertical;
+  }
+  textarea{min-height:52px;}
+  .row-en-ko{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:640px){.row-en-ko{grid-template-columns:1fr;}}
+  .item-card{border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-top:12px; background:#fff; position:relative;}
+  .item-card .remove-btn{position:absolute; top:10px; right:10px;}
+  .add-btn{margin-top:14px;}
+  .field-hint{font-size:11px; color:#A79BC9; margin-top:2px;}
+  .status-msg{
+    position:fixed; bottom:20px; right:20px; background:var(--ink); color:#fff; padding:12px 18px;
+    border-radius:8px; font-size:13px; font-family:'IBM Plex Mono',monospace; display:none; z-index:99;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toggle-row{display:flex; gap:8px; align-items:center; margin-top:14px;}
+  select{font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:6px 10px; border-radius:6px; border:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Sumin Hong 홈페이지 · 관리자 페이지</h1>
+    <p>content.json을 직접 편집하고 저장하세요. 저장 후 파일을 GitHub 저장소에 올리면 사이트에 반영됩니다.</p>
+  </div>
+  <div class="actions">
+    <button class="btn-secondary" id="reload-btn">불러오기</button>
+    <button class="btn-primary" id="download-btn">content.json 다운로드</button>
+  </div>
+</header>
+
+<main id="app">불러오는 중...</main>
+
+<div class="status-msg" id="status-msg"></div>
+
+<script>
+let DATA = null;
+
+async function loadData(){
+  try{
+    const res = await fetch('content.json', {cache:'no-store'});
+    DATA = await res.json();
+  }catch(e){
+    document.getElementById('app').innerHTML = '<div class="panel">content.json을 불러오지 못했습니다. admin.html과 content.json이 같은 폴더에 있고, 웹서버(GitHub Pages 등)로 열려 있는지 확인해주세요. file:// 로 직접 열면 브라우저 보안 정책 때문에 불러올 수 없습니다.</div>';
+    return;
+  }
+  renderApp();
+}
+
+function toast(msg){
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 2500);
+}
+
+function field(labelText, path, value, isTextarea){
+  const tag = isTextarea ? 'textarea' : 'input type="text"';
+  return `<label>${labelText}</label><${tag} data-path="${path}" ${isTextarea?'':'value="'+escapeAttr(value)+'"'}>${isTextarea? escapeHtml(value):''}</${isTextarea?'textarea':'input'}>`;
+}
+
+function escapeAttr(s){ return (s+'').replace(/"/g,'&quot;'); }
+function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function biField(labelText, path, obj){
+  obj = obj || {en:'', ko:''};
+  return `
+    <label>${labelText}</label>
+    <div class="row-en-ko">
+      <div><div class="field-hint">EN</div><textarea data-path="${path}.en">${escapeHtml(obj.en||'')}</textarea></div>
+      <div><div class="field-hint">KO</div><textarea data-path="${path}.ko">${escapeHtml(obj.ko||'')}</textarea></div>
+    </div>`;
+}
+
+function renderApp(){
+  const d = DATA;
+  let html = '';
+
+  // ---- HERO ----
+  html += `<div class="panel"><h2>Hero</h2><div class="desc">화면 맨 위 소개 영역</div>
+    ${biField('Eyebrow', 'hero.eyebrow', d.hero.eyebrow)}
+    ${biField('한 줄 소개 (Role text, HTML 가능)', 'hero.roleText', d.hero.roleText)}
+    ${biField('부제 (Sub)', 'hero.sub', d.hero.sub)}
+  </div>`;
+
+  // status chips
+  html += `<div class="panel"><h2>상태 표시 (Status chips)</h2><div class="desc">예: 임용 예정, 현재 소속</div><div id="chips-list">`;
+  d.hero.statusChips.forEach((c,i)=>{
+    html += `<div class="item-card">
+      <button class="btn-danger remove-btn" data-remove="hero.statusChips.${i}">삭제</button>
+      ${biField('문구', `hero.statusChips.${i}`, c)}
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="hero.statusChips">+ 상태 추가</button></div>`;
+
+  // hero links
+  html += `<div class="panel"><h2>연락처 링크 (Hero)</h2><div id="links-list">`;
+  d.hero.links.forEach((l,i)=>{
+    html += `<div class="item-card">
+      <button class="btn-danger remove-btn" data-remove="hero.links.${i}">삭제</button>
+      <label>표시 텍스트</label><input type="text" data-path="hero.links.${i}.label" value="${escapeAttr(l.label||'')}">
+      <label>링크(URL / mailto:)</label><input type="text" data-path="hero.links.${i}.href" value="${escapeAttr(l.href||'')}">
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="hero.links">+ 링크 추가</button></div>`;
+
+  // ---- ABOUT ----
+  html += `<div class="panel"><h2>소개 (About)</h2>
+    ${biField('본문 1', 'about.lead1', d.about.lead1)}
+    ${biField('본문 2', 'about.lead2', d.about.lead2)}
+  </div>`;
+
+  html += `<div class="panel"><h2>연구 관심사 태그</h2><div id="interests-list">`;
+  d.about.interests.forEach((it,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="about.interests.${i}">삭제</button>${biField('태그', `about.interests.${i}`, it)}</div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="about.interests">+ 태그 추가</button></div>`;
+
+  html += `<div class="panel"><h2>주요 정보 (Facts)</h2><div id="facts-list">`;
+  d.about.facts.forEach((f,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="about.facts.${i}">삭제</button>
+      ${biField('항목명 (k)', `about.facts.${i}.k`, f.k)}
+      ${biField('내용 (v)', `about.facts.${i}.v`, f.v)}
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="about.facts">+ 항목 추가</button></div>`;
+
+  // ---- CAREER ----
+  html += `<div class="panel"><h2>경력 (Career ledger)</h2><div id="career-list">`;
+  d.career.rows.forEach((r,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="career.rows.${i}">삭제</button>
+      <label>날짜</label><input type="text" data-path="career.rows.${i}.date" value="${escapeAttr(r.date)}">
+      ${biField('직함', `career.rows.${i}.title`, r.title)}
+      <label>소속</label><input type="text" data-path="career.rows.${i}.org" value="${escapeAttr(typeof r.org==='string'?r.org:'')}">
+      <div class="field-hint">소속이 한/영 다를 경우 JSON을 직접 다운로드해 수정해주세요.</div>
+      <div class="toggle-row">
+        <label style="margin:0;">상태</label>
+        <select data-path="career.rows.${i}.pill.type">
+          <option value="done" ${r.pill.type==='done'?'selected':''}>완료 (done)</option>
+          <option value="progress" ${r.pill.type==='progress'?'selected':''}>진행/예정 (progress)</option>
+        </select>
+      </div>
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="career.rows">+ 경력 추가</button></div>`;
+
+  // ---- RESEARCH: flagships ----
+  html += `<div class="panel"><h2>대표 연구 시스템 (Flagships)</h2><div id="flagship-list">`;
+  d.research.flagships.forEach((f,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="research.flagships.${i}">삭제</button>
+      <label>제목</label><input type="text" data-path="research.flagships.${i}.title" value="${escapeAttr(typeof f.title==='string'?f.title:'')}">
+      ${biField('설명', `research.flagships.${i}.desc`, f.desc)}
+      <label>링크 URL</label><input type="text" data-path="research.flagships.${i}.href" value="${escapeAttr(f.href)}">
+      <label>링크 표시 텍스트</label><input type="text" data-path="research.flagships.${i}.linkText" value="${escapeAttr(f.linkText)}">
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="research.flagships">+ 시스템 추가</button></div>`;
+
+  // ---- RESEARCH: publications ----
+  html += `<div class="panel"><h2>논문 (Publications)</h2><div id="pub-list-admin">`;
+  d.research.publications.forEach((p,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="research.publications.${i}">삭제</button>
+      <label>연도</label><input type="text" data-path="research.publications.${i}.year" value="${escapeAttr(p.year)}">
+      <label>저자 (HTML 가능, 본인 이름은 &lt;strong&gt;으로 감싸기)</label><textarea data-path="research.publications.${i}.authors">${escapeHtml(p.authors)}</textarea>
+      <label>제목</label><textarea data-path="research.publications.${i}.title">${escapeHtml(p.title)}</textarea>
+      <label>저널/출처</label><input type="text" data-path="research.publications.${i}.journal" value="${escapeAttr(p.journal)}">
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="research.publications">+ 논문 추가</button></div>`;
+
+  // ---- PROJECTS ----
+  html += `<div class="panel"><h2>프로젝트 (Projects)</h2><div id="project-list">`;
+  d.projects.rows.forEach((r,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="projects.rows.${i}">삭제</button>
+      <label>날짜</label><input type="text" data-path="projects.rows.${i}.date" value="${escapeAttr(r.date)}">
+      <label>제목</label><input type="text" data-path="projects.rows.${i}.title" value="${escapeAttr(r.title)}">
+      <div class="toggle-row">
+        <label style="margin:0;">역할군</label>
+        <select data-path="projects.rows.${i}.role">
+          <option value="pm" ${r.role==='pm'?'selected':''}>PM</option>
+          <option value="researcher" ${r.role==='researcher'?'selected':''}>Researcher</option>
+        </select>
+        <label style="margin:0;">진행상태</label>
+        <select data-path="projects.rows.${i}.status">
+          <option value="done" ${r.status==='done'?'selected':''}>done</option>
+          <option value="progress" ${r.status==='progress'?'selected':''}>progress</option>
+        </select>
+      </div>
+      <label>표시 배지 (완료/진행 중 등)</label><input type="text" data-path="projects.rows.${i}.pillLabel" value="${escapeAttr(r.pillLabel||'')}">
+      <label>역할 라벨 (PM / Researcher / Facilitator 등, 없으면 비워두기)</label><input type="text" data-path="projects.rows.${i}.roleLabel" value="${escapeAttr(r.roleLabel||'')}">
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="projects.rows">+ 프로젝트 추가</button></div>`;
+
+  // ---- CONTACT ----
+  html += `<div class="panel"><h2>연락처 (Footer)</h2>
+    ${biField('안내 문구', 'contact.lead', d.contact.lead)}
+    <div id="contact-links-list">`;
+  d.contact.links.forEach((l,i)=>{
+    html += `<div class="item-card"><button class="btn-danger remove-btn" data-remove="contact.links.${i}">삭제</button>
+      <label>값</label><input type="text" data-path="contact.links.${i}.value" value="${escapeAttr(l.value)}">
+      <label>링크</label><input type="text" data-path="contact.links.${i}.href" value="${escapeAttr(l.href)}">
+    </div>`;
+  });
+  html += `</div><button class="btn-secondary add-btn" data-add="contact.links">+ 링크 추가</button></div>`;
+
+  document.getElementById('app').innerHTML = html;
+  bindInputs();
+  bindAddRemove();
+}
+
+function getByPath(obj, path){
+  const parts = path.split('.');
+  let cur = obj;
+  for(const p of parts){ if(cur==null) return undefined; cur = cur[p]; }
+  return cur;
+}
+function setByPath(obj, path, value){
+  const parts = path.split('.');
+  let cur = obj;
+  for(let i=0;i<parts.length-1;i++){
+    const p = parts[i];
+    if(cur[p] == null) cur[p] = {};
+    cur = cur[p];
+  }
+  cur[parts[parts.length-1]] = value;
+}
+
+function bindInputs(){
+  document.querySelectorAll('[data-path]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      setByPath(DATA, el.dataset.path, el.value);
+    });
+    el.addEventListener('change', ()=>{
+      setByPath(DATA, el.dataset.path, el.value);
+    });
+  });
+}
+
+const TEMPLATES = {
+  'hero.statusChips': ()=>({en:'New status', ko:'새 상태', dot:'violet'}),
+  'hero.links': ()=>({label:'New link', href:'https://'}),
+  'about.interests': ()=>({en:'New interest', ko:'새 관심사'}),
+  'about.facts': ()=>({k:{en:'Label', ko:'항목'}, v:{en:'Value', ko:'내용'}}),
+  'career.rows': ()=>({date:'2026', title:{en:'New role', ko:'새 직함'}, org:'Organization', pill:{type:'progress', en:'ONGOING', ko:'진행 중'}}),
+  'research.flagships': ()=>({tag:{en:'PROJECT', ko:'프로젝트'}, title:'New system', desc:{en:'Description', ko:'설명'}, href:'https://', linkText:'link →'}),
+  'research.publications': ()=>({year:'2026', authors:'<strong>Hong, S.</strong>', title:'New publication title', journal:'Journal name'}),
+  'projects.rows': ()=>({role:'researcher', status:'done', date:'2026', title:'새 프로젝트', org:null, pill:'done', pillLabel:'완료', roleLabel:'Researcher'}),
+  'contact.links': ()=>({value:'label', href:'https://', k:'LINK'})
+};
+
+function bindAddRemove(){
+  document.querySelectorAll('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const path = btn.dataset.add;
+      const arr = getByPath(DATA, path);
+      arr.push(TEMPLATES[path] ? TEMPLATES[path]() : {});
+      renderApp();
+      toast('새 항목을 추가했습니다. 원하는 위치로 필요시 순서를 다운로드한 JSON에서 조정하세요.');
+    });
+  });
+  document.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const path = btn.dataset.remove;
+      const idx = Number(path.substring(path.lastIndexOf('.')+1));
+      const arrPath = path.substring(0, path.lastIndexOf('.'));
+      const arr = getByPath(DATA, arrPath);
+      arr.splice(idx,1);
+      renderApp();
+      toast('항목을 삭제했습니다.');
+    });
+  });
+}
+
+document.getElementById('reload-btn').addEventListener('click', ()=>{
+  if(confirm('저장하지 않은 변경사항은 사라집니다. 다시 불러올까요?')) loadData();
+});
+
+document.getElementById('download-btn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'content.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('content.json을 다운로드했습니다. 저장소의 content.json 파일을 이걸로 교체 후 커밋하세요.');
+});
+
+loadData();
+</script>
+</body>
+</html>

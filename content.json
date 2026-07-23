@@ -151,10 +151,10 @@
       {"role":"pm","status":"done","date":"2023.07–2023.11","title":"세종특별자치시교육청 — 세종형 메타버스학교 설립·운영 방안 정책연구","org":null,"pill":"done","pillLabel":"완료","roleLabel":"PM"},
       {"role":"researcher","status":"done","date":"2023.06–2023.10","title":"서울대학교 사범대학 — 예비교원 교수 역량 향상을 위한 VR 수업 시뮬레이션 개발","org":{"en":"→ prototype of TeacherGen@i","ko":"→ TeacherGen@i 원형"},"pill":"done","pillLabel":"완료","roleLabel":"Researcher"},
       {"role":"pm","status":"done","date":"2022.04–2022.11","title":"한국교육학술정보원(KERIS) — 메타버스의 교육적 활용을 위한 가이드라인 연구","org":null,"pill":"done","pillLabel":"완료","roleLabel":"PM"},
-      {"role":"researcher","status":"done","date":"2022.09–2023.01","title":"교육부 AIEDAP — 예비·현직 교원의 AI·디지털 역량강 체계 정립","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Assist Researcher"},
-      {"role":"pm","status":"done","date":"2022.11 –2022.12","title":"SK Academy — Post 코로나 시대 과정 개발을 윤한 HRD Trend Tracking","org":null,"pill":"done","pillLabel":"완료","roleLabel":"PM"},
-      {"role":"researcher","status":"done","date":"2019.05","title":"LG 아카믰미 — 스스로 생각하는 능력 강화를 윴한 교육방범론 개발","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Researcher"},
-      {"role":"researcher","status":"done","date":"2019.03–2019.05","title":"현대자동차 구매본부 — 역량 모델맄","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Facilitator"}
+      {"role":"researcher","status":"done","date":"2022.09–2023.01","title":"교육부 AIEDAP — 예비·현직 교원의 AI·디지털 역량 체계 정립","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Assist Researcher"},
+      {"role":"pm","status":"done","date":"2022.11–2022.12","title":"SK Academy — Post 코로나 시대 과정 개발을 위한 HRD Trend Tracking","org":null,"pill":"done","pillLabel":"완료","roleLabel":"PM"},
+      {"role":"researcher","status":"done","date":"2019.05","title":"LG 아카데미 — 스스로 생각하는 능력 강화를 위한 교육방법론 개발","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Researcher"},
+      {"role":"researcher","status":"done","date":"2019.03–2019.05","title":"현대자동차 구매본부 — 역량 모델링","org":null,"pill":"done","pillLabel":"완료","roleLabel":"Facilitator"}
     ]
   },
   "teaching": {
@@ -164,18 +164,18 @@
     "courseLectures": [
       {"title":"인공지능 교과 융합 교육론 기초","meta":"Seoul National University · 2025–2026"},
       {"title":"디지털교육","meta":{"en":"Seoul National University · 2025–2026 (regular + winter/summer sessions)","ko":"서울대학교 · 2025–2026 (정규 학기 + 계절학기)"}},
-      {"title":{"en":"Instructional Methods &amp; Educational Technology (required for teaching certification)","ko":"교육방법 및 교육공학 (교직합직)"},"meta":"Seoul Women's University · 2025-2"},
+      {"title":{"en":"Instructional Methods &amp; Educational Technology (required for teaching certification)","ko":"교육방법 및 교육공학 (교직필수)"},"meta":"Seoul Women's University · 2025-2"},
       {"title":{"en":"AI/EduTech Clinic","ko":"AI/에듀테크 클리닉"},"meta":{"en":"SNU Center for Liberal Education · 2021– present","ko":"서울대학교 기초교육원 · 2021–현재"}}
     ],
-    "invitedTalksLabel": {"en":"Invited Talks &amp; Guest Lectures (English)","ko":"䴈청 강연 (영어)"},
+    "invitedTalksLabel": {"en":"Invited Talks &amp; Guest Lectures (English)","ko":"초청 강연 (영어)"},
     "invitedTalks": [
       {"title":"Text as Data: Approaches, Challenges, and Strategies in Learning Sciences Research","meta":"2025 KELS Workshop"},
       {"title":"Video as Data","meta":"2025 KELS Workshop"},
       {"title":"Introduction to Systematic Literature Review","meta":"2025 KELS Workshop"},
       {"title":"Integrating a Generative AI-Enhanced VR Simulation into Teacher Education","meta":"Indiana University · R678 / KELS Colloquium"}
     ],
-    "specialLecturesLabel": {"en":"Recent special lectures — GenAI &amp; vibe coding (2026)","ko":"챜근 특강 — 생성형 AI 및 바이브코딩 (2026)"},
-    "specialLecturesNote": "서강대학교 디지털교육 바이브코딩 특강 · 숭실대학교 AI 실습형 교수�% 워크숍 · 인첸대학교 교수�% 특강 「생성형 AI 활용스펙트럼 넓히기」· 대한기계학회 「LLM 기반 업무 혁신 사례」· 서울대학교 중문과 강사워크숍 「생성형 AI 기반 바이브코딩 실습」."
+    "specialLecturesLabel": {"en":"Recent special lectures — GenAI &amp; vibe coding (2026)","ko":"최근 특강 — 생성형 AI 및 바이브코딩 (2026)"},
+    "specialLecturesNote": "서강대학교 디지털교육 바이브코딩 특강 · 숭실대학교 AI 실습형 교수법 워크숍 · 인천대학교 교수법 특강 「생성형 AI 활용 스펙트럼 넓히기」· 대한기계학회 「LLM 기반 업무 혁신 사례」· 서울대학교 중문과 강사워크숍 「생성형 AI 기반 바이브코딩 실습」."
   },
   "contact": {
     "sectionTitle": {"en":"Get in touch","ko":"연락하기"},
